@@ -1,0 +1,5 @@
+redux toolkit + react redux
+npm install @reduxjs/toolkit react-redux
+tailwind css
+npm install -D tailwindcss
+npx tailwindcss init

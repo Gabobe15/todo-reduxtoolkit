@@ -1,0 +1,121 @@
+useSelector - retrieve data from any component
+useDispatch - update something(data) in the the store we use this hook, we can also say 'useDispatch' is used together with 'reducer' to update data in the 'store', send data to the store
+reducer - control the state (delete, add, update)
+store - where we store data
+
+steps 
+1. create store 
+import { configureStore } from "@reduxjs/toolkit";
+
+import todoReducer from '../features/todo/todoSlice'
+
+export const store = configureStore({
+  reducer: todoReducer,
+});
+
+
+2.  create todoSlice 
+import {createSlice, nanoid} from '@reduxjs/toolkit'
+
+const initialState = {
+    todos: [],
+}
+
+export const todoSlice = createSlice({
+  name: "todo",
+  initialState,
+  reducers: {
+    addTodo: (state, action) => {
+      const todo = {
+        id: nanoid(),
+        text: action.payload,
+      }
+      state.todos.push(todo)
+    },
+    removeTodo: (state, action) => {
+      state.todos = state.todos.filter(todo => todo.id !== action.payload)
+    }
+  }
+});
+
+export const {addTodo, removeTodo } = todoSlice.actions
+
+export default todoSlice.reducer
+
+
+3. addTodo functionality
+import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { addTodo } from "../features/todo/todoSlice";
+
+function AddTodo() {
+  const [input, setInput] = useState("");
+  const dispatch = useDispatch();
+  const addTodoHandler = (e) => {
+    e.preventDefault();
+    dispatch(addTodo(input));
+    setInput("");
+  };
+  return (
+    <form onSubmit={addTodoHandler}>
+      <input
+        type="text"
+        placeholder="Enter a Todo..."
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+      />
+      <button type="submit"> Add Todo </button>
+    </form>
+  );
+}
+
+export default AddTodo;
+
+
+4. removeTodo functionality
+import { useSelector  } from 'react-redux/es/hooks/useSelector'
+import { removeTodo } from '../features/todo/todoSlice';
+import deleteLogo from '../assets/delete.svg'
+import { useDispatch } from 'react-redux';
+
+function Todos() {
+   const todos = useSelector(store => store.todos)
+   const dispatch = useDispatch()
+  return (
+    <>
+      <div> Todos </div>
+      { <ul className="list-none">
+          {todos.map((todo) => (
+            <li key={todo.id}>
+              <div> {todo.text} </div>
+              <button
+                onClick={() => dispatch(removeTodo(todo.id))}
+              >
+                <img src={deleteLogo} alt="" />
+              </button>
+            </li>
+          ))}
+        </ul> }
+    </>
+  );
+}
+
+export default Todos
+
+5. providing data to the App - index.js file
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import App from './App.jsx'
+import './index.css'
+import { store } from './App/store.jsx'
+import { Provider } from 'react-redux'
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <Provider store={store} >
+      <App />
+    </Provider>
+  </React.StrictMode>,
+)
+
+
